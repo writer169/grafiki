@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { SensorData } from '@/models/SensorData';
-import { Layout } from 'plotly.js'; // добавим импорт типа Layout
+import { Layout } from 'plotly.js';
 
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
 
@@ -58,10 +58,10 @@ export default function TemperatureChart({
           return {
             type: 'scatter' as const,
             mode: 'lines+markers',
-            name: sensor,
+            name: ' ', // Убираем подписи в легенде, но оставляем пробел чтобы цвет отображался
             x,
             y,
-            line: { color: sensorColors[sensor], width: 2 },
+            line: { color: sensorColors[sensor], width: 2.5 },
             marker: { color: sensorColors[sensor], size: 5 },
             connectgaps: false
           };
@@ -76,23 +76,19 @@ export default function TemperatureChart({
   }, [data, selectedSensors, sensorColors]);
 
   const layout: Partial<Layout> = {
-    title: { text: 'График температуры' },
+    title: { text: 'График температуры', font: { size: 22 } },
     autosize: true,
     height: 500,
     margin: { l: 50, r: 50, b: 50, t: 80, pad: 4 },
     xaxis: {
       title: { text: 'Время' },
-      tickformat: '%d.%m.%Y %H:%M',
+      tickformat: '%d.%m %H:%M', // Удаляем год из формата даты
       tickangle: -45
     },
     yaxis: {
-    title: { text: 'Температура (°C)' }
-  },
-    showlegend: true,
-    legend: {
-      orientation: 'h',
-      y: -0.2
+      title: { text: 'Температура (°C)' }
     },
+    showlegend: false, // Скрываем легенду полностью
     hovermode: 'closest',
     plot_bgcolor: '#f8f9fa',
     paper_bgcolor: '#ffffff'
@@ -100,7 +96,7 @@ export default function TemperatureChart({
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg shadow p-6 flex justify-center items-center h-64">
+      <div className="flex justify-center items-center h-64">
         <div className="text-center">
           <svg
             className="animate-spin h-8 w-8 text-blue-500 mx-auto mb-2"
@@ -130,8 +126,8 @@ export default function TemperatureChart({
 
   if (chartData.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="text-center py-8">
+      <div className="py-8">
+        <div className="text-center">
           <p className="text-gray-500">
             {selectedSensors.length === 0
               ? 'Выберите хотя бы один датчик для отображения графика'
@@ -143,7 +139,7 @@ export default function TemperatureChart({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-4">
+    <div>
       <Plot
         data={chartData}
         layout={layout}
