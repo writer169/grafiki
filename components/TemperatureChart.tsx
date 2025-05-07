@@ -74,7 +74,10 @@ export default function TemperatureChart({ data, selectedSensors, sensorColors }
   }, [data, selectedSensors, sensorColors]);
 
   const layout = {
-    title: 'График температуры',
+    // Меняем строковое значение на объект с полем text
+    title: {
+      text: 'График температуры'
+    },
     autosize: true,
     height: 500,
     margin: { l: 50, r: 50, b: 50, t: 80, pad: 4 },
