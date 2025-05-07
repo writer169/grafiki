@@ -8,7 +8,7 @@ interface SensorsListProps {
 }
 
 export default function SensorsList({ sensorData, sensorColors }: SensorsListProps) {
-  // Задаём порядок датчиков
+  // Порядок датчиков: Город, Веранда, Кухня, Спальня
   const orderedSensors = ['Город', 'Веранда', 'Кухня', 'Спальня']
     .filter(s => sensorData.some(data => data.sensor_id === s))
     .map(sensorId => sensorData.find(data => data.sensor_id === sensorId)!)
@@ -16,6 +16,7 @@ export default function SensorsList({ sensorData, sensorColors }: SensorsListPro
 
   return (
     <div className="bg-white rounded-xl shadow-xl overflow-hidden mx-auto max-w-4xl">
+      {/* Заголовок с градиентом */}
       <h3 className="text-xl font-bold p-6 bg-gradient-to-r from-gray-50 to-gray-100 border-b text-gray-900">
         Последние показания
       </h3>
@@ -24,28 +25,17 @@ export default function SensorsList({ sensorData, sensorColors }: SensorsListPro
         <table className="min-w-full divide-y divide-gray-300 table-auto">
           <thead className="bg-gray-800 text-white">
             <tr>
-              <th
-                scope="col"
-                className="px-4 py-3.5 text-center text-sm font-semibold uppercase tracking-wide shadow-sm"
-              >
+              {/* Заголовки с тенью и контрастным фоном */}
+              <th scope="col" className="px-4 py-3.5 text-center text-sm font-semibold uppercase tracking-wide shadow-sm">
                 Датчик
               </th>
-              <th
-                scope="col"
-                className="px-4 py-3.5 text-center text-sm font-semibold uppercase tracking-wide shadow-sm"
-              >
+              <th scope="col" className="px-4 py-3.5 text-center text-sm font-semibold uppercase tracking-wide shadow-sm">
                 Температура
               </th>
-              <th
-                scope="col"
-                className="px-4 py-3.5 text-center text-sm font-semibold uppercase tracking-wide shadow-sm"
-              >
+              <th scope="col" className="px-4 py-3.5 text-center text-sm font-semibold uppercase tracking-wide shadow-sm">
                 Статус
               </th>
-              <th
-                scope="col"
-                className="px-4 py-3.5 text-center text-sm font-semibold uppercase tracking-wide shadow-sm"
-              >
+              <th scope="col" className="px-4 py-3.5 text-center text-sm font-semibold uppercase tracking-wide shadow-sm">
                 Время
               </th>
             </tr>
@@ -58,6 +48,7 @@ export default function SensorsList({ sensorData, sensorColors }: SensorsListPro
                   className="hover:bg-gray-50 transition-all duration-200 animate-fade-in"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
+                  {/* Датчик: цветной текст и кружок, эффект увеличения */}
                   <td className="px-4 py-4 whitespace-nowrap text-center group">
                     <div className="flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
                       <div
@@ -72,11 +63,13 @@ export default function SensorsList({ sensorData, sensorColors }: SensorsListPro
                       </div>
                     </div>
                   </td>
+                  {/* Температура: жирный шрифт, синий цвет, эффект смены цвета */}
                   <td className="px-4 py-4 whitespace-nowrap text-center group">
                     <div className="text-base font-bold text-blue-600 group-hover:text-blue-700 transition-colors duration-200">
                       {sensor.value !== null ? `${sensor.value.toFixed(1)}°C` : '—'}
                     </div>
                   </td>
+                  {/* Статус: зелёный/красный, тень при наведении */}
                   <td className="px-4 py-4 whitespace-nowrap text-center group">
                     <span
                       className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full group-hover:shadow-sm transition-all duration-200 ${
@@ -92,6 +85,7 @@ export default function SensorsList({ sensorData, sensorColors }: SensorsListPro
                       {sensor.status === 'online' ? 'On' : 'Off'}
                     </span>
                   </td>
+                  {/* Время: курсив, серый цвет, эффект смены цвета */}
                   <td className="px-4 py-4 whitespace-nowrap text-center group">
                     <div className="text-sm italic text-gray-500 group-hover:text-gray-600 transition-colors duration-200">
                       {format(new Date(sensor.timestamp), 'HH:mm', { locale: ru })}
