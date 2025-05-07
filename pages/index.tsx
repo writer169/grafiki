@@ -129,68 +129,184 @@ export default function Home({ initialData, lastValues }: HomeProps) {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      router.push('/login');
+    } catch (error) {
+      console.error('Ошибка при выходе из системы:', error);
+    }
+  };
+
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-6">
-        {/* Refresh Button */}
-        <div className="mb-6">
-          <button
-            onClick={handleRefresh}
-            className="flex items-center bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition-all duration-300 disabled:opacity-50"
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <svg className="animate-spin mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Обновление...
-              </>
-            ) : (
-              'Обновить данные'
-            )}
-          </button>
-        </div>
-
+      <div className="container mx-auto px-4 py-8 max-w-5xl">
         {!isAuthorized ? (
           <div className="bg-amber-100 border-l-4 border-amber-500 text-amber-700 p-4 rounded-lg mb-6 animate-pulse">
             Для просмотра данных необходимо авторизоваться. Перенаправление на страницу входа...
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Controls Panel */}
-            <div className="lg:col-span-1 space-y-6">
-              <div className="bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl">
-                <SensorCheckboxes
-                  sensors={availableSensors}
-                  selectedSensors={selectedSensors}
-                  onChange={handleSensorChange}
-                  sensorColors={SENSOR_COLORS}
-                />
+          <div className="space-y-8">
+            {/* Temperature Chart */}
+            <div className="bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl">
+              <TemperatureChart
+                data={sensorData}
+                selectedSensors={selectedSensors}
+                sensorColors={SENSOR_COLORS}
+              />
+              
+              {/* Date Range Picker */}
+              <div className="mt-6">
                 <DateRangePicker
                   startDate={startDate}
                   endDate={endDate}
                   onChange={handleDateChange}
                 />
               </div>
-              <div className="bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl">
-                <SensorsList
-                  sensorData={lastSensorValues}
-                  sensorColors={SENSOR_COLORS}
-                />
+            </div>
+            
+            {/* Sensor Checkboxes */}
+            <div className="bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl">
+              <div className="flex flex-wrap justify-center gap-6">
+                {availableSensors.map((sensor) => (
+                  <div key={sensor} className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id={`sensor-${sensor}`}
+                      checked={selectedSensors.includes(sensor)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedSensors([...selectedSensors, sensor]);
+                        } else {
+                          setSelectedSensors(selectedSensors.filter(s => s !== sensor));
+                        }
+                      }}
+                      className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <label
+                      htmlFor={`sensor-${sensor}`}
+                      className="ml-2 text-base font-medium"
+                      style={{ color: SENSOR_COLORS[sensor] }}
+                    >
+                      {sensor}
+                    </label>
+                  </div>
+                ))}
               </div>
             </div>
-
-            {/* Chart Panel */}
-            <div className="lg:col-span-2">
-              <div className="bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl">
-                <TemperatureChart
-                  data={sensorData}
-                  selectedSensors={selectedSensors}
-                  sensorColors={SENSOR_COLORS}
-                />
+            
+            {/* Sensors Data Table */}
+            <div className="bg-white rounded-xl shadow-xl overflow-hidden">              
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-300 table-auto">
+                  <thead className="bg-gray-800 text-white">
+                    <tr>
+                      <th scope="col" className="px-6 py-4 text-center text-sm font-semibold uppercase tracking-wide">
+                        Датчик
+                      </th>
+                      <th scope="col" className="px-6 py-4 text-center text-sm font-semibold uppercase tracking-wide">
+                        Температура
+                      </th>
+                      <th scope="col" className="px-6 py-4 text-center text-sm font-semibold uppercase tracking-wide">
+                        Статус
+                      </th>
+                      <th scope="col" className="px-6 py-4 text-center text-sm font-semibold uppercase tracking-wide">
+                        Время
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {lastSensorValues.length > 0 ? (
+                      lastSensorValues
+                        .filter(sensor => ['Город', 'Веранда', 'Кухня', 'Спальня'].includes(sensor.sensor_id))
+                        .sort((a, b) => {
+                          const order = ['Город', 'Веранда', 'Кухня', 'Спальня'];
+                          return order.indexOf(a.sensor_id) - order.indexOf(b.sensor_id);
+                        })
+                        .map((sensor, index) => (
+                          <tr
+                            key={sensor.sensor_id}
+                            className="hover:bg-gray-50 transition-all duration-200 animate-fade-in"
+                            style={{ animationDelay: `${index * 0.1}s` }}
+                          >
+                            <td className="px-6 py-5 whitespace-nowrap text-center">
+                              <div className="flex items-center justify-center">
+                                <div
+                                  className="w-3 h-3 rounded-full mr-2"
+                                  style={{ backgroundColor: SENSOR_COLORS[sensor.sensor_id] }}
+                                ></div>
+                                <div
+                                  className="text-sm font-medium"
+                                  style={{ color: SENSOR_COLORS[sensor.sensor_id] }}
+                                >
+                                  {sensor.sensor_id}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-5 whitespace-nowrap text-center">
+                              <div className="text-lg font-bold text-blue-600">
+                                {sensor.value !== null ? `${sensor.value.toFixed(1)}°C` : '—'}
+                              </div>
+                            </td>
+                            <td className="px-6 py-5 whitespace-nowrap text-center">
+                              <span
+                                className={`px-4 py-1.5 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                  sensor.status === 'online'
+                                    ? 'bg-green-100 text-green-800'
+                                    : 'bg-red-100 text-red-800'
+                                }`}
+                              >
+                                {sensor.status === 'online' ? 'On' : 'Off'}
+                              </span>
+                            </td>
+                            <td className="px-6 py-5 whitespace-nowrap text-center">
+                              <div className="text-sm italic text-gray-500">
+                                {new Date(sensor.timestamp).toLocaleTimeString('ru-RU', {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                    ) : (
+                      <tr>
+                        <td colSpan={4} className="px-6 py-8 text-center text-sm font-medium text-gray-500 animate-pulse">
+                          Нет данных
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
+            </div>
+            
+            {/* Buttons */}
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={handleRefresh}
+                className="flex items-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md transition-all duration-300 disabled:opacity-50"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <svg className="animate-spin mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Обновление...
+                  </>
+                ) : (
+                  'Обновить данные'
+                )}
+              </button>
+              
+              <button
+                onClick={handleLogout}
+                className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2.5 px-6 rounded-lg shadow-md transition-all duration-300"
+              >
+                Выйти
+              </button>
             </div>
           </div>
         )}
