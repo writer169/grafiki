@@ -40,17 +40,44 @@ export default function Home({ initialData, lastValues }: HomeProps) {
     }
   }, [lastSensorValues]);
 
+  // Автоматическая загрузка данных при первом открытии страницы
+  useEffect(() => {
+    // Загружаем последние значения датчиков
+    loadLastValues();
+  }, []);
+
+  // Эффект для загрузки данных графика после обновления списка выбранных датчиков
+  useEffect(() => {
+    if (selectedSensors.length > 0 && startDate && endDate) {
+      fetchData(startDate, endDate, selectedSensors);
+    }
+  }, [selectedSensors]);
+
+  // Функция для загрузки последних значений датчиков
+  const loadLastValues = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get('/api/data');
+      setLastSensorValues(response.data.lastValues);
+    } catch (error) {
+      console.error('Ошибка при получении последних значений датчиков:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Обработчик изменения дат
   const handleDateChange = (start: Date | null, end: Date | null) => {
     setStartDate(start);
     setEndDate(end);
-    fetchData(start, end, selectedSensors);
+    if (start && end && selectedSensors.length > 0) {
+      fetchData(start, end, selectedSensors);
+    }
   };
 
   // Обработчик изменения выбранных датчиков
   const handleSensorChange = (sensors: string[]) => {
     setSelectedSensors(sensors);
-    fetchData(startDate, endDate, sensors);
   };
 
   // Получение данных с сервера
@@ -89,8 +116,10 @@ export default function Home({ initialData, lastValues }: HomeProps) {
       const response = await axios.get('/api/data');
       setLastSensorValues(response.data.lastValues);
       
-      // Обновляем данные графика
-      fetchData(startDate, endDate, selectedSensors);
+      // Если есть выбранные датчики, обновляем данные графика
+      if (selectedSensors.length > 0 && startDate && endDate) {
+        fetchData(startDate, endDate, selectedSensors);
+      }
     } catch (error) {
       console.error('Ошибка при обновлении данных:', error);
     } finally {
@@ -160,24 +189,3 @@ export default function Home({ initialData, lastValues }: HomeProps) {
     </Layout>
   );
 }
-
-export const getServerSideProps: GetServerSideProps = async () => {
-  try {
-    // В SSR мы не можем использовать аутентификацию через куки,
-    // поэтому вернем начальные пустые данные
-    return {
-      props: {
-        initialData: [],
-        lastValues: [],
-      },
-    };
-  } catch (error) {
-    console.error('Ошибка при получении начальных данных:', error);
-    return {
-      props: {
-        initialData: [],
-        lastValues: [],
-      },
-    };
-  }
-};
