@@ -64,15 +64,13 @@ export async function fetchTuyaData(): Promise<SensorData[]> {
 
       const isOnline = onlineStatusMap.get(device.id) || false;
       const temperatureStatus = device.status.find(s => s.code === 'va_temperature');
-      
-      // Ищем имя датчика в карте или используем ID
+
       const sensorId = sensorNames[device.id] || device.id;
-      
-      // Добавляем данные в результат
+
       result.push({
         sensor_id: sensorId,
         timestamp: now,
-        value: temperatureStatus ? temperatureStatus.value / 10 : null, // Перевод значения (215 -> 21.5)
+        value: temperatureStatus ? temperatureStatus.value / 10 : null,
         status: isOnline ? 'online' : 'offline'
       });
     });
@@ -92,30 +90,32 @@ export async function fetchNarodmonData(): Promise<SensorData> {
 
   const apiKey = process.env.NARODMON_KEY;
   const uuid = process.env.UUID_NARODMON;
-  const sensorId = '37687'; // ID датчика из требований
-  
+  const sensorId = '37687';
+
   try {
     const url = `https://api.narodmon.ru?cmd=sensorsValues&sensors=${sensorId}&uuid=${uuid}&api_key=${apiKey}`;
     const response = await axios.get<NarodmonResponse>(url);
-    
-    if (!response.data.sensors || response.data.sensors.length === 0) {
-      throw new Error('No data received from Narodmon');
+
+    // Логируем весь ответ, чтобы понять его структуру
+    console.log('Narodmon response:', response.data);
+
+    // Проверка на корректную структуру
+    if (!response.data?.sensors || !Array.isArray(response.data.sensors) || response.data.sensors.length === 0) {
+      throw new Error('No valid sensors data received from Narodmon');
     }
-    
+
     const sensor = response.data.sensors[0];
-    // Ищем имя датчика в карте или используем "Город" по умолчанию
     const sensorName = sensorNames[sensorId] || 'Город';
-    
+
     return {
       sensor_id: sensorName,
-      timestamp: new Date(sensor.time * 1000), // Преобразуем Unix timestamp в Date
+      timestamp: new Date(sensor.time * 1000),
       value: sensor.value,
-      status: 'online' // Предполагаем, что датчик онлайн, если данные пришли
+      status: 'online'
     };
   } catch (error) {
-    console.error('Error fetching Narodmon data:', error);
-    
-    // В случае ошибки возвращаем запись с null value и offline статусом
+    console.error('Ошибка при запросе к Narodmon:', error);
+
     return {
       sensor_id: sensorNames[sensorId] || 'Город',
       timestamp: new Date(),
