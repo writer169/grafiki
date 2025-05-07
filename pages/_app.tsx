@@ -7,27 +7,41 @@ import '../styles/globals.css';
 function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const publicPaths = ['/login'];
 
   useEffect(() => {
-    // Проверяем аутентификацию при загрузке приложения
+    // Проверяем аутентификацию при загрузке и при смене маршрута
     const checkAuth = async () => {
       try {
-        // Простая проверка куки на клиенте
-        const hasToken = document.cookie.includes('token=');
-        setIsAuthenticated(hasToken);
+        setIsLoading(true);
         
-        // Если не аутентифицирован и пытается зайти на защищенную страницу
-        if (!hasToken && !publicPaths.includes(router.pathname)) {
+        // Проверка через API вместо простой проверки куки
+        const response = await axios.get('/api/verify-auth', { 
+          withCredentials: true 
+        });
+        
+        const isAuthed = response.status === 200;
+        setIsAuthenticated(isAuthed);
+        
+        // Обработка редиректов на основе аутентификации
+        if (!isAuthed && !publicPaths.includes(router.pathname)) {
+          // Не аутентифицирован и пытается зайти на защищенную страницу
           router.push('/login');
-        }
-        // Если аутентифицирован и пытается зайти на страницу входа
-        else if (hasToken && publicPaths.includes(router.pathname)) {
+        } else if (isAuthed && publicPaths.includes(router.pathname)) {
+          // Аутентифицирован и пытается зайти на страницу входа
           router.push('/');
         }
       } catch (error) {
         console.error('Ошибка при проверке аутентификации:', error);
         setIsAuthenticated(false);
+        
+        // Если ошибка аутентификации, перенаправляем на логин
+        if (!publicPaths.includes(router.pathname)) {
+          router.push('/login');
+        }
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -35,7 +49,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   }, [router.pathname]);
 
   // Если проверка аутентификации еще не завершена, показываем индикатор загрузки
-  if (isAuthenticated === null) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex justify-center items-center bg-gray-100">
         <div className="text-center">
