@@ -47,16 +47,16 @@ export default function DateRangePicker({ startDate, endDate, onChange }: DateRa
 
   return (
     <div className="mb-6">
-      <h3 className="text-lg font-medium mb-2">Период</h3>
+      <h3 className="text-lg font-semibold text-gray-800 mb-3">Период</h3>
       
       <div className="flex flex-wrap gap-2 mb-4">
         <button
           type="button"
           onClick={() => handlePresetChange('24h')}
-          className={`px-3 py-1 rounded ${
+          className={`date-range-button ${
             !isCustomRange && startDate && endDate && endDate.getTime() - startDate.getTime() === 24 * 60 * 60 * 1000
-              ? 'bg-blue-500 text-white'
-              : 'bg-gray-200 hover:bg-gray-300'
+              ? 'date-range-button--active'
+              : 'date-range-button--inactive'
           }`}
         >
           24 часа
@@ -65,10 +65,10 @@ export default function DateRangePicker({ startDate, endDate, onChange }: DateRa
         <button
           type="button"
           onClick={() => handlePresetChange('7d')}
-          className={`px-3 py-1 rounded ${
+          className={`date-range-button ${
             !isCustomRange && startDate && endDate && endDate.getTime() - startDate.getTime() === 7 * 24 * 60 * 60 * 1000
-              ? 'bg-blue-500 text-white'
-              : 'bg-gray-200 hover:bg-gray-300'
+              ? 'date-range-button--active'
+              : 'date-range-button--inactive'
           }`}
         >
           7 дней
@@ -77,10 +77,10 @@ export default function DateRangePicker({ startDate, endDate, onChange }: DateRa
         <button
           type="button"
           onClick={() => handlePresetChange('30d')}
-          className={`px-3 py-1 rounded ${
+          className={`date-range-button ${
             !isCustomRange && startDate && endDate && endDate.getTime() - startDate.getTime() === 30 * 24 * 60 * 60 * 1000
-              ? 'bg-blue-500 text-white'
-              : 'bg-gray-200 hover:bg-gray-300'
+              ? 'date-range-button--active'
+              : 'date-range-button--inactive'
           }`}
         >
           30 дней
@@ -89,8 +89,8 @@ export default function DateRangePicker({ startDate, endDate, onChange }: DateRa
         <button
           type="button"
           onClick={() => handlePresetChange('custom')}
-          className={`px-3 py-1 rounded ${
-            isCustomRange ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+          className={`date-range-button ${
+            isCustomRange ? 'date-range-button--active' : 'date-range-button--inactive'
           }`}
         >
           Произвольно
@@ -112,7 +112,7 @@ export default function DateRangePicker({ startDate, endDate, onChange }: DateRa
               endDate={endDate}
               dateFormat="dd.MM.yyyy"
               locale={ru}
-              className="border border-gray-300 rounded px-3 py-2"
+              className="date-range-input"
             />
           </div>
           
@@ -130,7 +130,7 @@ export default function DateRangePicker({ startDate, endDate, onChange }: DateRa
               minDate={startDate}
               dateFormat="dd.MM.yyyy"
               locale={ru}
-              className="border border-gray-300 rounded px-3 py-2"
+              className="date-range-input"
             />
           </div>
         </div>
