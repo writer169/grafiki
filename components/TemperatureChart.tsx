@@ -81,7 +81,7 @@ export default function TemperatureChart({
     height: 500,
     margin: { l: 50, r: 50, b: 50, t: 80, pad: 4 },
     xaxis: {
-      title: 'Время',
+      title: { text: 'Время' },
       tickformat: '%d.%m.%Y %H:%M',
       tickangle: -45
     },
