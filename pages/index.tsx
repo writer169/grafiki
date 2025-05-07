@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { GetServerSideProps } from 'next';
-import { subHours, subDays } from 'date-fns';
+import { subHours } from 'date-fns';
 import { useRouter } from 'next/router';
 import { SensorData } from '@/models/SensorData';
 import Layout from '@/components/Layout';
@@ -10,12 +10,12 @@ import DateRangePicker from '@/components/DateRangePicker';
 import SensorCheckboxes from '@/components/SensorCheckboxes';
 import SensorsList from '@/components/SensorsList';
 
-// Цвета для датчиков
+// Sensor colors in the requested order
 const SENSOR_COLORS: Record<string, string> = {
-  'Спальня': '#e53935',
-  'Веранда': '#43a047',
-  'Кухня': '#1e88e5',
-  'Город': '#f9a825'
+  'Город': '#f59e0b',
+  'Веранда': '#10b981',
+  'Кухня': '#3b82f6',
+  'Спальня': '#ef4444'
 };
 
 interface HomeProps {
@@ -25,50 +25,45 @@ interface HomeProps {
 
 export default function Home({ initialData, lastValues }: HomeProps) {
   const router = useRouter();
-  const [startDate, setStartDate] = useState<Date | null>(subHours(new Date(), 24)); // Последние 24 часа по умолчанию
+  const [startDate, setStartDate] = useState<Date | null>(subHours(new Date(), 24));
   const [endDate, setEndDate] = useState<Date | null>(new Date());
   const [sensorData, setSensorData] = useState<SensorData[]>(initialData);
   const [lastSensorValues, setLastSensorValues] = useState<SensorData[]>(lastValues);
   const [availableSensors, setAvailableSensors] = useState<string[]>([]);
   const [selectedSensors, setSelectedSensors] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isAuthorized, setIsAuthorized] = useState<boolean>(true); // Предполагаем, что пользователь авторизован, чтобы не показывать сообщение сразу
+  const [isAuthorized, setIsAuthorized] = useState<boolean>(true);
 
-  // Проверка авторизации и загрузка данных при загрузке страницы
   useEffect(() => {
-    // Загружаем последние значения датчиков при первой загрузке
     loadLastValues();
   }, []);
 
-  // Получаем уникальный список датчиков из данных
   useEffect(() => {
     if (lastSensorValues.length > 0) {
-      const sensors = lastSensorValues.map(sensor => sensor.sensor_id);
+      const sensors = ['Город', 'Веранда', 'Кухня', 'Спальня'].filter(sensor => 
+        lastSensorValues.some(data => data.sensor_id === sensor)
+      );
       setAvailableSensors(sensors);
-      setSelectedSensors(sensors); // По умолчанию выбираем все датчики
+      setSelectedSensors(sensors);
     }
   }, [lastSensorValues]);
 
-  // Эффект для загрузки данных графика после обновления списка выбранных датчиков
   useEffect(() => {
     if (selectedSensors.length > 0 && startDate && endDate) {
       fetchData(startDate, endDate, selectedSensors);
     }
   }, [selectedSensors]);
 
-  // Функция для загрузки последних значений датчиков
   const loadLastValues = async () => {
     setIsLoading(true);
     try {
       const response = await axios.get('/api/data');
       setLastSensorValues(response.data.lastValues);
-      setIsAuthorized(true); // Успешная загрузка означает, что пользователь авторизован
+      setIsAuthorized(true);
     } catch (error: any) {
-      console.error('Ошибка при получении последних значений датчиков:', error);
-      // Проверяем код ошибки, если 401 - пользователь не авторизован
-      if (error.response && error.response.status === 401) {
+      console.error('Ошибка при получении последних значений:', error);
+      if (error.response?.status === 401) {
         setIsAuthorized(false);
-        // Перенаправляем на страницу логина
         router.push('/login');
       }
     } finally {
@@ -76,7 +71,6 @@ export default function Home({ initialData, lastValues }: HomeProps) {
     }
   };
 
-  // Обработчик изменения дат
   const handleDateChange = (start: Date | null, end: Date | null) => {
     setStartDate(start);
     setEndDate(end);
@@ -85,38 +79,29 @@ export default function Home({ initialData, lastValues }: HomeProps) {
     }
   };
 
-  // Обработчик изменения выбранных датчиков
   const handleSensorChange = (sensors: string[]) => {
     setSelectedSensors(sensors);
   };
 
-  // Получение данных с сервера
   const fetchData = async (start: Date | null, end: Date | null, sensors: string[]) => {
     if (!start || !end || sensors.length === 0) {
       setSensorData([]);
       return;
     }
-
     setIsLoading(true);
-
     try {
-      // Подготавливаем параметры запроса
       const params = new URLSearchParams();
       params.append('start', start.toISOString());
       params.append('end', end.toISOString());
       sensors.forEach(sensor => params.append('sensors', sensor));
-
-      // Выполняем запрос
       const response = await axios.get(`/api/data?${params.toString()}`);
       setSensorData(response.data.data);
-      setIsAuthorized(true); // Успешная загрузка означает, что пользователь авторизован
+      setIsAuthorized(true);
     } catch (error: any) {
       console.error('Ошибка при получении данных:', error);
       setSensorData([]);
-      // Проверяем код ошибки, если 401 - пользователь не авторизован
-      if (error.response && error.response.status === 401) {
+      if (error.response?.status === 401) {
         setIsAuthorized(false);
-        // Перенаправляем на страницу логина
         router.push('/login');
       }
     } finally {
@@ -124,26 +109,19 @@ export default function Home({ initialData, lastValues }: HomeProps) {
     }
   };
 
-  // Обработчик кнопки обновления данных
   const handleRefresh = async () => {
     setIsLoading(true);
-    
     try {
-      // Получаем последние значения датчиков
       const response = await axios.get('/api/data');
       setLastSensorValues(response.data.lastValues);
-      setIsAuthorized(true); // Успешная загрузка означает, что пользователь авторизован
-      
-      // Если есть выбранные датчики, обновляем данные графика
+      setIsAuthorized(true);
       if (selectedSensors.length > 0 && startDate && endDate) {
         fetchData(startDate, endDate, selectedSensors);
       }
     } catch (error: any) {
       console.error('Ошибка при обновлении данных:', error);
-      // Проверяем код ошибки, если 401 - пользователь не авторизован
-      if (error.response && error.response.status === 401) {
+      if (error.response?.status === 401) {
         setIsAuthorized(false);
-        // Перенаправляем на страницу логина
         router.push('/login');
       }
     } finally {
@@ -153,77 +131,76 @@ export default function Home({ initialData, lastValues }: HomeProps) {
 
   return (
     <Layout>
-      <div className="mb-6">
-        <button
-          onClick={handleRefresh}
-          className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded flex items-center"
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <>
-              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2.5 5.291A8 8 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3.5-2.647z"></path>
-              </svg>
-              Обновление...
-            </>
-          ) : (
-            'Обновить данные'
-          )}
-        </button>
-      </div>
+      <div className="container mx-auto px-4 py-6">
+        {/* Refresh Button */}
+        <div className="mb-6">
+          <button
+            onClick={handleRefresh}
+            className="flex items-center bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition-all duration-300 disabled:opacity-50"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <svg className="animate-spin mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Обновление...
+              </>
+            ) : (
+              'Обновить данные'
+            )}
+          </button>
+        </div>
 
-      {!isAuthorized ? (
-        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4">
-          Для просмотра данных необходимо авторизоваться. Перенаправление на страницу входа...
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow p-6">
-              {/* Выбор датчиков */}
-              <SensorCheckboxes
-                sensors={availableSensors}
-                selectedSensors={selectedSensors}
-                onChange={handleSensorChange}
-                sensorColors={SENSOR_COLORS}
-              />
-              
-              {/* Выбор периода времени */}
-              <DateRangePicker
-                startDate={startDate}
-                endDate={endDate}
-                onChange={handleDateChange}
-              />
+        {!isAuthorized ? (
+          <div className="bg-amber-100 border-l-4 border-amber-500 text-amber-700 p-4 rounded-lg mb-6 animate-pulse">
+            Для просмотра данных необходимо авторизоваться. Перенаправление на страницу входа...
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Controls Panel */}
+            <div className="lg:col-span-1 space-y-6">
+              <div className="bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl">
+                <SensorCheckboxes
+                  sensors={availableSensors}
+                  selectedSensors={selectedSensors}
+                  onChange={handleSensorChange}
+                  sensorColors={SENSOR_COLORS}
+                />
+                <DateRangePicker
+                  startDate={startDate}
+                  endDate={endDate}
+                  onChange={handleDateChange}
+                />
+              </div>
+              <div className="bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl">
+                <SensorsList
+                  sensorData={lastSensorValues}
+                  sensorColors={SENSOR_COLORS}
+                />
+              </div>
             </div>
-            
-            {/* Последние показания */}
-            <div className="mt-6">
-              <SensorsList
-                sensorData={lastSensorValues}
-                sensorColors={SENSOR_COLORS}
-              />
+
+            {/* Chart Panel */}
+            <div className="lg:col-span-2">
+              <div className="bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl">
+                <TemperatureChart
+                  data={sensorData}
+                  selectedSensors={selectedSensors}
+                  sensorColors={SENSOR_COLORS}
+                />
+              </div>
             </div>
           </div>
-          
-          <div className="lg:col-span-2">
-            {/* График */}
-            <TemperatureChart
-              data={sensorData}
-              selectedSensors={selectedSensors}
-              sensorColors={SENSOR_COLORS}
-            />
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </Layout>
   );
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
   try {
-    // В SSR мы не можем использовать аутентификацию через куки,
-    // поэтому вернем начальные пустые данные
     return {
       props: {
         initialData: [],
