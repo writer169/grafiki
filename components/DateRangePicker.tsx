@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import { ru } from 'date-fns/locale';
-import { subDays, subHours, startOfDay, endOfDay } from 'date-fns';
+import { subDays, subHours, endOfDay } from 'date-fns';
 import 'react-datepicker/dist/react-datepicker.css';
 
 interface DateRangePickerProps {
@@ -46,10 +46,10 @@ export default function DateRangePicker({ startDate, endDate, onChange }: DateRa
   };
 
   return (
-    <div className="mb-6">
+    <div>
       <h3 className="text-lg font-semibold text-gray-800 mb-3">Период</h3>
       
-      <div className="flex flex-wrap gap-2 mb-4">
+      <div className="flex flex-wrap gap-2 mb-4 justify-center">
         <button
           type="button"
           onClick={() => handlePresetChange('24h')}
@@ -98,7 +98,7 @@ export default function DateRangePicker({ startDate, endDate, onChange }: DateRa
       </div>
       
       {isCustomRange && (
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap gap-4 justify-center">
           <div>
             <label htmlFor="start-date" className="block text-sm font-medium text-gray-700 mb-1">
               С
