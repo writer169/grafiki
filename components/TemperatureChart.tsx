@@ -86,8 +86,8 @@ export default function TemperatureChart({
       tickangle: -45
     },
     yaxis: {
-      title: 'Температура (°C)'
-    },
+    title: { text: 'Температура (°C)' }
+  },
     showlegend: true,
     legend: {
       orientation: 'h',
