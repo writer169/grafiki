@@ -21,17 +21,23 @@ export default function Login() {
     setError('');
     
     try {
-      const response = await axios.post('/api/auth', { password });
+      const response = await axios.post('/api/auth', { password }, {
+        withCredentials: true
+      });
       
       if (response.status === 200) {
-        // Перенаправляем на главную страницу
-        router.push('/');
+        // Устанавливаем небольшую задержку для обработки куки
+        setTimeout(() => {
+          // Перенаправляем на главную страницу
+          router.push('/');
+        }, 300);
       }
     } catch (error: any) {
       if (error.response && error.response.status === 401) {
         setError('Неверный пароль');
       } else {
         setError('Ошибка авторизации. Попробуйте позже.');
+        console.error('Ошибка авторизации:', error);
       }
     } finally {
       setLoading(false);
