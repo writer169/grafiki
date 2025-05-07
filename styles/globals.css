@@ -7,7 +7,7 @@ html, body {
   padding: 0;
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  background-color: #f8fafc; /* Светлый фон для современного вида */
+  background-color: #f8fafc;
 }
 
 * {
@@ -26,7 +26,7 @@ html, body {
 }
 
 .react-datepicker__header {
-  background-color: #3b82f6; /* Синий фон для заголовка */
+  background-color: #3b82f6;
   color: white;
   border-top-left-radius: 0.5rem;
   border-top-right-radius: 0.5rem;
@@ -43,19 +43,39 @@ html, body {
   color: #1e40af;
 }
 
-/* Стили для улучшения кнопок и инпутов */
-button, input, Savićević
-input:focus, button:focus {
+/* Стили для кнопок и инпутов */
+button, input {
+  transition: all 0.2s ease-in-out;
+}
+
+button:focus, input:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
 }
 
 /* Кастомные анимации */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.3s ease-in;
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Стили для DateRangePicker */
+.date-range-button {
+  @apply px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200;
+}
+
+.date-range-button--active {
+  @apply bg-blue-600 text-white shadow-md;
+}
+
+.date-range-button--inactive {
+  @apply bg-gray-200 text-gray-700 hover:bg-gray-300 hover:shadow-sm;
+}
+
+.date-range-input {
+  @apply w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200;
 }
