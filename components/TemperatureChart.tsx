@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { SensorData } from '@/models/SensorData';
+import { Layout } from 'plotly.js'; // добавим импорт типа Layout
 
-// Динамический импорт без рендеринга на сервере
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
 
 interface TemperatureChartProps {
@@ -29,7 +29,6 @@ export default function TemperatureChart({
     setIsLoading(true);
 
     try {
-      // Группируем данные по датчикам
       const groupedData: Record<string, SensorData[]> = {};
 
       data.forEach((item) => {
@@ -39,11 +38,9 @@ export default function TemperatureChart({
         groupedData[item.sensor_id].push(item);
       });
 
-      // Создаем данные для графика для каждого датчика
       const plotData = selectedSensors
         .filter((sensor) => groupedData[sensor])
         .map((sensor) => {
-          // Сортируем данные по времени
           const sensorData = groupedData[sensor].sort(
             (a, b) =>
               new Date(a.timestamp).getTime() -
@@ -59,7 +56,7 @@ export default function TemperatureChart({
           });
 
           return {
-            type: 'scatter',
+            type: 'scatter' as const,
             mode: 'lines+markers',
             name: sensor,
             x,
@@ -78,7 +75,7 @@ export default function TemperatureChart({
     }
   }, [data, selectedSensors, sensorColors]);
 
-  const layout = {
+  const layout: Partial<Layout> = {
     title: { text: 'График температуры' },
     autosize: true,
     height: 500,
