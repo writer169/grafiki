@@ -1,7 +1,6 @@
 import { ReactNode } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import axios from 'axios';
 
 interface LayoutProps {
   children: ReactNode;
@@ -9,20 +8,6 @@ interface LayoutProps {
 }
 
 export default function Layout({ children, title = 'Мониторинг датчиков температуры' }: LayoutProps) {
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    try {
-      // Удаляем куки, устанавливая пустое значение и срок действия в прошлом
-      document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-      
-      // Перенаправляем на страницу входа
-      router.push('/login');
-    } catch (error) {
-      console.error('Ошибка при выходе из системы:', error);
-    }
-  };
-
   return (
     <>
       <Head>
@@ -32,28 +17,20 @@ export default function Layout({ children, title = 'Мониторинг дат�
         <link rel="icon" href="/favicon.ico" />
       </Head>
       
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-gray-50">
         <header className="bg-blue-600 text-white shadow-md">
-          <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-            <h1 className="text-xl font-bold">{title}</h1>
-            {router.pathname !== '/login' && (
-              <button
-                onClick={handleLogout}
-                className="bg-blue-700 hover:bg-blue-800 px-3 py-1 rounded text-sm"
-              >
-                Выйти
-              </button>
-            )}
+          <div className="container mx-auto px-4 py-3 flex justify-center items-center">
+            {/* Удаляем заголовок из шапки как требовалось */}
           </div>
         </header>
         
-        <main className="flex-grow container mx-auto px-4 py-6">
+        <main className="flex-grow">
           {children}
         </main>
         
-        <footer className="bg-gray-100 py-4 border-t">
-          <div className="container mx-auto px-4 text-center text-gray-600 text-sm">
-            &copy; {new Date().getFullYear()} Мониторинг датчиков температуры
+        <footer className="bg-gray-100 py-3 border-t">
+          <div className="container mx-auto px-4 text-center text-gray-400 text-xs">
+            writer169 &copy; {new Date().getFullYear()}
           </div>
         </footer>
       </div>
