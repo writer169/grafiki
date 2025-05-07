@@ -79,3 +79,47 @@ button:focus, input:focus {
 .date-range-input {
   @apply w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200;
 }
+
+/* Улучшенные стили для таблицы */
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+}
+
+th, td {
+  padding: 0.75rem 1rem;
+  text-align: center;
+}
+
+thead th {
+  background-color: #1f2937;
+  color: white;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+}
+
+tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+tbody tr:hover {
+  background-color: rgba(243, 244, 246, 1);
+}
+
+/* Красивые блоки с тенями */
+.card {
+  @apply bg-white rounded-xl shadow-lg overflow-hidden transition-shadow duration-300;
+}
+
+.card:hover {
+  @apply shadow-xl;
+}
+
+/* Улучшенные стили для графика */
+.plotly-graph {
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
