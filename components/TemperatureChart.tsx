@@ -57,12 +57,16 @@ export default function TemperatureChart({
 
           return {
             type: 'scatter' as const,
-            mode: 'lines+markers',
-            name: ' ', // Убираем подписи в легенде, но оставляем пробел чтобы цвет отображался
+            mode: 'lines', // Убрали маркеры, оставили только линии
+            name: ' ',
             x,
             y,
-            line: { color: sensorColors[sensor], width: 2.5 },
-            marker: { color: sensorColors[sensor], size: 5 },
+            line: { 
+              color: sensorColors[sensor], 
+              width: 2.5,
+              shape: 'spline', // Добавили сглаживание линий
+              smoothing: 1.3 // Коэффициент сглаживания
+            },
             connectgaps: false
           };
         });
@@ -81,14 +85,14 @@ export default function TemperatureChart({
     height: 500,
     margin: { l: 50, r: 50, b: 50, t: 80, pad: 4 },
     xaxis: {
-      title: { text: 'Время' },
-      tickformat: '%d.%m %H:%M', // Удаляем год из формата даты
-      tickangle: -45
+      tickformat: '%d.%m %H:%M',
+      tickangle: -45,
+      title: '' // Убрали подпись "Время"
     },
     yaxis: {
-      title: { text: 'Температура (°C)' }
+      title: '' // Убрали подпись "Температура (°C)"
     },
-    showlegend: false, // Скрываем легенду полностью
+    showlegend: false,
     hovermode: 'closest',
     plot_bgcolor: '#f8f9fa',
     paper_bgcolor: '#ffffff'
