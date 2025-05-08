@@ -19,6 +19,34 @@ export default function TemperatureChart({
   const [chartData, setChartData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Функция для дополнительного сглаживания данных
+  const smoothData = (points: number[], windowSize: number = 3): number[] => {
+    if (points.length < windowSize) return points;
+    
+    const smoothed: number[] = [];
+    
+    // Начальные точки остаются как есть
+    for (let i = 0; i < Math.floor(windowSize/2); i++) {
+      smoothed.push(points[i]);
+    }
+    
+    // Скользящее среднее
+    for (let i = Math.floor(windowSize/2); i < points.length - Math.floor(windowSize/2); i++) {
+      let sum = 0;
+      for (let j = i - Math.floor(windowSize/2); j <= i + Math.floor(windowSize/2); j++) {
+        sum += points[j];
+      }
+      smoothed.push(sum / windowSize);
+    }
+    
+    // Конечные точки остаются как есть
+    for (let i = points.length - Math.floor(windowSize/2); i < points.length; i++) {
+      smoothed.push(points[i]);
+    }
+    
+    return smoothed;
+  };
+
   useEffect(() => {
     if (!data || data.length === 0) {
       setChartData([]);
@@ -49,11 +77,26 @@ export default function TemperatureChart({
 
           const x: Date[] = [];
           const y: (number | null)[] = [];
+          const rawValues: number[] = [];
 
           sensorData.forEach((item) => {
             x.push(new Date(item.timestamp));
+            if (item.value !== null) {
+              rawValues.push(item.value);
+            }
             y.push(item.value);
           });
+          
+          // Применяем дополнительное сглаживание, если точек достаточно
+          const smoothedValues = rawValues.length >= 5 ? smoothData(rawValues, 5) : rawValues;
+          
+          // Заменяем исходные значения сглаженными
+          let smoothedIndex = 0;
+          for (let i = 0; i < y.length; i++) {
+            if (y[i] !== null) {
+              y[i] = smoothedValues[smoothedIndex++];
+            }
+          }
 
           return {
             type: 'scatter' as const,
@@ -65,9 +108,11 @@ export default function TemperatureChart({
               color: sensorColors[sensor], 
               width: 2.5,
               shape: 'spline', // Добавили сглаживание линий
-              smoothing: 1 // Коэффициент сглаживания
+              smoothing: 1.6 // Максимальный коэффициент сглаживания
             },
-            connectgaps: false
+            connectgaps: true, // Соединяем точки с пропусками для более гладкой линии
+            hoverinfo: 'x+y', // Улучшенная информация при наведении
+            hoverlabel: { bgcolor: sensorColors[sensor] }, // Цвет метки соответствует цвету линии
           };
         });
 
@@ -87,10 +132,13 @@ export default function TemperatureChart({
     xaxis: {
       tickformat: '%d.%m %H:%M',
       tickangle: -45,
-      title: { text: '' } // Убрали подпись "Время"
+      title: { text: '' }, // Убрали подпись "Время"
+      tickfont: { size: 10 }, // Уменьшили размер шрифта подписей даты и времени
+      nticks: 8 // Уменьшаем количество отметок для более чистого вида
     },
     yaxis: {
-      title: { text: '' } // Убрали подпись "Температура (°C)"
+      title: { text: '' }, // Убрали подпись "Температура (°C)"
+      tickfont: { size: 10 } // Уменьшили размер шрифта значений температуры
     },
     showlegend: false,
     hovermode: 'closest',
