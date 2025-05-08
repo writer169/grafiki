@@ -87,10 +87,10 @@ export default function TemperatureChart({
     xaxis: {
       tickformat: '%d.%m %H:%M',
       tickangle: -45,
-      title: '' // Убрали подпись "Время"
+      title: { text: '' } // Убрали подпись "Время"
     },
     yaxis: {
-      title: '' // Убрали подпись "Температура (°C)"
+      title: { text: '' } // Убрали подпись "Температура (°C)"
     },
     showlegend: false,
     hovermode: 'closest',
