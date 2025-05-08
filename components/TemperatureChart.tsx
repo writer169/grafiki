@@ -128,17 +128,23 @@ export default function TemperatureChart({
     title: { text: 'График температуры', font: { size: 22 } },
     autosize: true,
     height: 500,
-    margin: { l: 50, r: 50, b: 50, t: 80, pad: 4 },
+    margin: { l: 40, r: 40, b: 40, t: 80, pad: 4 }, // Немного уменьшены отступы
     xaxis: {
       tickformat: '%d.%m %H:%M',
       tickangle: -45,
       title: { text: '' }, // Убрали подпись "Время"
-      tickfont: { size: 10 }, // Уменьшили размер шрифта подписей даты и времени
-      nticks: 8 // Уменьшаем количество отметок для более чистого вида
+      tickfont: { size: 8, family: 'Arial, sans-serif' }, // Очень маленький шрифт для времени
+      nticks: 6, // Меньше отметок времени для более чистого вида
+      showgrid: false // Убираем вертикальную сетку
     },
     yaxis: {
       title: { text: '' }, // Убрали подпись "Температура (°C)"
-      tickfont: { size: 10 } // Уменьшили размер шрифта значений температуры
+      tickfont: { size: 10, family: 'Arial, sans-serif' }, // Шрифт для значений температуры
+      showticklabels: true, // Показываем подписи значений температуры
+      tickformat: '.1f', // Формат с одним знаком после запятой
+      showgrid: true, // Оставляем горизонтальную сетку
+      gridcolor: '#e0e0e0', // Светлый цвет сетки
+      zeroline: false // Убираем линию нуля
     },
     showlegend: false,
     hovermode: 'closest',
