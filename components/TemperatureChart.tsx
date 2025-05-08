@@ -65,7 +65,7 @@ export default function TemperatureChart({
               color: sensorColors[sensor], 
               width: 2.5,
               shape: 'spline', // Добавили сглаживание линий
-              smoothing: 1.3 // Коэффициент сглаживания
+              smoothing: 1.6 // Коэффициент сглаживания
             },
             connectgaps: false
           };
