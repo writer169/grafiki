@@ -3,123 +3,182 @@
 @tailwind utilities;
 
 /* Глобальные стили для улучшения UX */
-html, body {
-  padding: 0;
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  background-color: #f8fafc;
+@layer base {
+  html, body {
+    @apply p-0 m-0 bg-gray-50;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  }
+
+  * {
+    @apply box-border;
+  }
+
+  button, input {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  button:focus, input:focus {
+    @apply outline-none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+  }
 }
 
-* {
-  box-sizing: border-box;
+@layer components {
+  /* Компоненты для кнопок */
+  .btn-primary {
+    @apply bg-blue-600 text-white px-4 py-2 rounded-lg font-medium text-sm hover:bg-blue-700 focus:bg-blue-700 transition-all duration-200 shadow-sm hover:shadow-md;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium text-sm hover:bg-gray-300 hover:shadow-sm transition-all duration-200;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 text-white px-4 py-2 rounded-lg font-medium text-sm hover:bg-red-700 focus:bg-red-700 transition-all duration-200 shadow-sm hover:shadow-md;
+  }
+
+  /* Компоненты для форм */
+  .input-field {
+    @apply w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200;
+  }
+
+  /* Компоненты для карточек */
+  .card {
+    @apply bg-white rounded-xl shadow-soft overflow-hidden transition-shadow duration-300 hover:shadow-medium;
+  }
+
+  .card-header {
+    @apply px-6 py-4 border-b border-gray-200 bg-gray-50;
+  }
+
+  .card-body {
+    @apply px-6 py-4;
+  }
+
+  /* Компоненты для таблиц */
+  .table-container {
+    @apply overflow-hidden rounded-xl shadow-soft bg-white;
+  }
+
+  .table-header {
+    @apply bg-gray-900 text-white font-semibold text-xs uppercase tracking-wider;
+  }
+
+  .table-cell {
+    @apply px-4 py-3 text-center text-sm;
+  }
+
+  .table-row {
+    @apply transition-colors duration-200 hover:bg-gray-50;
+  }
+
+  /* Стили для DateRangePicker */
+  .date-range-button {
+    @apply px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200;
+  }
+
+  .date-range-button--active {
+    @apply bg-blue-600 text-white shadow-md;
+  }
+
+  .date-range-button--inactive {
+    @apply bg-gray-200 text-gray-700 hover:bg-gray-300 hover:shadow-sm;
+  }
+
+  .date-range-input {
+    @apply input-field;
+  }
+}
+
+@layer utilities {
+  /* Кастомные анимации */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out forwards;
+  }
+
+  /* Утилиты для теней */
+  .shadow-soft {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  .shadow-medium {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .shadow-strong {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* Keyframes для анимаций */
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(10px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
 }
 
 /* Стили для react-datepicker */
 .react-datepicker-wrapper {
-  width: 100%;
+  @apply w-full;
 }
 
 .react-datepicker {
-  font-family: inherit;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  @apply font-sans rounded-lg shadow-medium;
 }
 
 .react-datepicker__header {
-  background-color: #3b82f6;
-  color: white;
-  border-top-left-radius: 0.5rem;
-  border-top-right-radius: 0.5rem;
+  @apply bg-blue-600 text-white rounded-t-lg;
 }
 
 .react-datepicker__day--selected,
 .react-datepicker__day--keyboard-selected {
-  background-color: #3b82f6;
-  color: white;
+  @apply bg-blue-600 text-white;
 }
 
 .react-datepicker__day:hover {
-  background-color: #bfdbfe;
-  color: #1e40af;
+  @apply bg-blue-100 text-blue-800;
 }
 
-/* Стили для кнопок и инпутов */
-button, input {
-  transition: all 0.2s ease-in-out;
-}
-
-button:focus, input:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
-}
-
-/* Кастомные анимации */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.3s ease-out forwards;
-}
-
-/* Стили для DateRangePicker */
-.date-range-button {
-  @apply px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200;
-}
-
-.date-range-button--active {
-  @apply bg-blue-600 text-white shadow-md;
-}
-
-.date-range-button--inactive {
-  @apply bg-gray-200 text-gray-700 hover:bg-gray-300 hover:shadow-sm;
-}
-
-.date-range-input {
-  @apply w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200;
+/* Стили для Plotly графиков */
+.plotly-graph {
+  @apply rounded-xl overflow-hidden;
 }
 
 /* Улучшенные стили для таблицы */
 table {
+  @apply w-full;
   border-collapse: separate;
   border-spacing: 0;
-  width: 100%;
-}
-
-th, td {
-  padding: 0.75rem 1rem;
-  text-align: center;
 }
 
 thead th {
-  background-color: #1f2937;
-  color: white;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  font-size: 0.875rem;
+  @apply table-header table-cell;
+}
+
+tbody td {
+  @apply table-cell;
 }
 
 tbody tr {
-  transition: background-color 0.2s ease;
-}
-
-tbody tr:hover {
-  background-color: rgba(243, 244, 246, 1);
-}
-
-/* Красивые блоки с тенями */
-.card {
-  @apply bg-white rounded-xl shadow-lg overflow-hidden transition-shadow duration-300;
-}
-
-.card:hover {
-  @apply shadow-xl;
-}
-
-/* Улучшенные стили для графика */
-.plotly-graph {
-  border-radius: 0.75rem;
-  overflow: hidden;
+  @apply table-row;
 }
